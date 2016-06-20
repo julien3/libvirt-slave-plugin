@@ -4,6 +4,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.plugins.libvirt.lib.jlibvirt.JLibVirtConnectImpl;
 import hudson.plugins.libvirt.lib.libvirt.LibVirtConnectImpl;
+import org.libvirt.ConnectAuthDefault;
 
 /**
  * Created by magnayn on 05/02/2014.
@@ -94,14 +95,24 @@ public class ConnectionBuilder {
         {
             if( uri == null )
                 uri = constructHypervisorURI();
-            return new LibVirtConnectImpl(uri, readOnly);
+            if(hypervisorType.toLowerCase().equals("xenapi"))
+                return new LibVirtConnectImpl(uri, new ConnectAuthDefault(), readOnly);
+            else
+                return new LibVirtConnectImpl(uri, readOnly);
+            
         }
     }
 
     public String constructHypervisorURI () {
         // Fixing JENKINS-14617
         final String separator = (hypervisorSysUrl.contains("?")) ? "&" : "?";
-        return hypervisorType.toLowerCase() + "+" + protocol + userName + "@" + hypervisorHost + ":" + hypervisorPort + "/" + hypervisorSysUrl + separator + "no_tty=1";
+        
+        if(hypervisorType.toLowerCase().equals("xenapi")) {
+            return hypervisorType.toLowerCase() + "://" + userName + "@" + hypervisorHost + "/" + hypervisorSysUrl;
+        }
+        else {
+            return hypervisorType.toLowerCase() + "+" + protocol + userName + "@" + hypervisorHost + ":" + hypervisorPort + "/" + hypervisorSysUrl + separator + "no_tty=1";
+        }
     }
 
     public String constructNativeHypervisorURI () {

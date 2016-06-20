@@ -5,6 +5,7 @@ import hudson.plugins.libvirt.lib.IConnect;
 import hudson.plugins.libvirt.lib.IDomain;
 import hudson.plugins.libvirt.lib.VirtException;
 import org.libvirt.Connect;
+import org.libvirt.ConnectAuth;
 import org.libvirt.LibvirtException;
 
 /**
@@ -21,6 +22,15 @@ public class LibVirtConnectImpl implements IConnect {
         try
         {
             this.connect = new Connect(hypervisorUri, b);
+        } catch (LibvirtException e) {
+            throw new VirtException(e);
+        }
+    }
+    
+    public LibVirtConnectImpl(String hypervisorUri, ConnectAuth auth, boolean b) throws VirtException {
+        try
+        {
+            this.connect = new Connect(hypervisorUri, auth, b ? 1 : 0);
         } catch (LibvirtException e) {
             throw new VirtException(e);
         }
